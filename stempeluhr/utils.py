@@ -111,6 +111,11 @@ def setup_logging(log_file_path: Path = LOG_FILE_PATH) -> None:
                 "filename": log_file_path,
             },
         },
+        # third-party chatter: alembic startup notes, matplotlib font cache scan
+        "loggers": {
+            "alembic": {"level": "WARNING"},
+            "matplotlib": {"level": "WARNING"},
+        },
         "root": {
             "level": "INFO",
             "handlers": ["stout", "stderr", "file"],
