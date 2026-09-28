@@ -8,7 +8,8 @@ from PyQt6.QtSvg import QSvgRenderer
 from stempeluhr.filepath import PACKAGE_PATH
 from stempeluhr.utils import get_background_color, get_font_color
 
-APP_ICON_SVG = PACKAGE_PATH / "ui" / "stempeluhr.svg"
+# read at import: in the onefile build the file lives in a temp dir that macOS purges after 3 days
+_APP_ICON_SVG = (PACKAGE_PATH / "ui" / "stempeluhr.svg").read_text()
 # stroke color the SVG is authored with, swapped for the theme color at runtime
 _SVG_SOURCE_COLOR = "#4d5157"
 
@@ -53,7 +54,7 @@ def generate_app_icon(color: str, badge: str | None = None) -> QIcon:
 
     With badge ("start"/"stop"), overlay the matching glyph in the bottom-left corner.
     """
-    svg = APP_ICON_SVG.read_text().replace(_SVG_SOURCE_COLOR, color)
+    svg = _APP_ICON_SVG.replace(_SVG_SOURCE_COLOR, color)
     renderer = QSvgRenderer(QByteArray(svg.encode()))
     badge_icon = generate_icon(*_BADGE_ICONS[badge]) if badge in _BADGE_ICONS else None
     icon = QIcon()

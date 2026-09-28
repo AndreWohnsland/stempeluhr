@@ -30,7 +30,6 @@ class UiController:
         message_box.setText(str(message))
         message_box.setWindowIcon(get_app_icon())
         message_box.setWindowTitle("Information")
-        message_box.show()
         message_box.exec()
 
     def show_notification(self, tray_icon: QSystemTrayIcon, message: str, title: str, timeout: int = 3) -> None:
