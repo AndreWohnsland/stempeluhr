@@ -31,7 +31,7 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/AndreWohnsland/TimeTracker"
+Repository = "https://github.com/AndreWohnsland/Stempeluhr"
 
 [project.scripts]
 stempeluhr = "stempeluhr.main:app"

@@ -1,4 +1,4 @@
-"""Alembic environment setup for TimeTracker."""
+"""Alembic environment setup for Stempeluhr."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ target_metadata = Base.metadata
 
 def get_database_url() -> str:
     """Resolve the database URL used for migrations."""
-    env_url = os.getenv("TIME_TRACKER_DB_URL")
+    env_url = os.getenv("STEMPELUHR_DB_URL")
     if env_url:
         return env_url
 

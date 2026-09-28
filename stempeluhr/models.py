@@ -1,4 +1,4 @@
-"""SQLAlchemy ORM models for the TimeTracker database.
+"""SQLAlchemy ORM models for the Stempeluhr database.
 
 This module defines the database models using SQLAlchemy ORM for type-safe
 database operations. The models mirror the existing SQLite database schema

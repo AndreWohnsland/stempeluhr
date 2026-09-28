@@ -4,8 +4,8 @@
 
 A Qt-Application to start and stop time tracking, enter additional breaks, view your daily and monthly data, and generate a report out of it.
 
-![mainwindow](https://raw.githubusercontent.com/AndreWohnsland/TimeTracker/master/doc/mainwindow.PNG 'mainwindow')
-![report](https://raw.githubusercontent.com/AndreWohnsland/TimeTracker/master/doc/report.PNG 'report')
+![mainwindow](https://raw.githubusercontent.com/AndreWohnsland/Stempeluhr/master/doc/mainwindow.PNG 'mainwindow')
+![report](https://raw.githubusercontent.com/AndreWohnsland/Stempeluhr/master/doc/report.PNG 'report')
 
 ## Installation
 
@@ -31,7 +31,7 @@ uv tool upgrade stempeluhr
 ### B: Standalone Installation
 
 With a new release, there is also a standalone version available.
-You can download the latest release from the [release page](https://github.com/AndreWohnsland/TimeTracker/releases).
+You can download the latest release from the [release page](https://github.com/AndreWohnsland/Stempeluhr/releases).
 Choose the right version for your operating system and download the file.
 Execute the file according to your usual system start option.
 The application will start and you can use it as described below.
@@ -43,10 +43,10 @@ Just use the installer, put it on the desktop, and start the application via the
 #### Linux
 
 You probably know your ways how to get started with the binary file.
-But if you are lazy like me, you can install the application with the [following script](https://github.com/AndreWohnsland/TimeTracker/blob/master/scripts/installer.sh):
+But if you are lazy like me, you can install the application with the [following script](https://github.com/AndreWohnsland/Stempeluhr/blob/master/scripts/installer.sh):
 
 ```bash
-curl -s https://raw.githubusercontent.com/AndreWohnsland/TimeTracker/master/scripts/installer.sh | bash
+curl -s https://raw.githubusercontent.com/AndreWohnsland/Stempeluhr/master/scripts/installer.sh | bash
 ```
 
 This will download the latest release, put it into your binary folder, and create an application entry.
@@ -62,8 +62,8 @@ First clone the repository and cd into it.
 To start the app, you run the `runme.py` file, you can create a shortcut on your desktop:
 
 ```bash
-git clone https://github.com/AndreWohnsland/TimeTracker.git
-cd TimeTracker
+git clone https://github.com/AndreWohnsland/Stempeluhr.git
+cd Stempeluhr
 uv sync
 uv run runme.py
 ```
@@ -97,7 +97,7 @@ Over the spin box you can select the pause time and submit them with the `Pause`
 It is also possible to enter negative Pause to correct previous mistakes.
 You can also start and stop over the tray icon in the taskbar.
 
-![settings](https://raw.githubusercontent.com/AndreWohnsland/TimeTracker/master/doc/options.PNG 'settings')
+![settings](https://raw.githubusercontent.com/AndreWohnsland/Stempeluhr/master/doc/options.PNG 'settings')
 
 ## Reports
 
@@ -120,7 +120,7 @@ To go back to the default option, click the shown back button.
 
 ## Updating to latest Version
 
-Just download the latest executable from the [release page](https://github.com/AndreWohnsland/TimeTracker/releases).
+Just download the latest executable from the [release page](https://github.com/AndreWohnsland/Stempeluhr/releases).
 If you have installed the application manually, you can update it with git:
 
 ```bash
