@@ -66,7 +66,7 @@ class UiController:
     def display_about(self) -> None:
         message = (
             f"Version: {__version__}. This App was made with Python and Qt by Andre Wohnsland. "
-            "Check https://github.com/AndreWohnsland/TimeTracker for more information."
+            "Check https://github.com/AndreWohnsland/Stempeluhr for more information."
         )
         self.show_message(message)
 

@@ -1,6 +1,6 @@
 """Database controller using SQLAlchemy ORM for type-safe database operations.
 
-This module provides the main database interface for the TimeTracker application.
+This module provides the main database interface for the Stempeluhr application.
 It uses SQLAlchemy ORM to provide type-safe database operations with proper Python
 type hints and better developer experience.
 
