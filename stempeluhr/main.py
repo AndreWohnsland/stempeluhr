@@ -1,6 +1,7 @@
 import logging
 import sys
 from importlib.metadata import PackageNotFoundError, version
+from types import TracebackType
 
 import typer
 
@@ -29,12 +30,19 @@ def main(
         run_gui()
 
 
+def _log_unhandled_exception(exc_type: type[BaseException], exc: BaseException, tb: TracebackType | None) -> None:
+    logger.critical("Unhandled exception", exc_info=(exc_type, exc, tb))
+
+
 def run_gui() -> None:
     """Start the Qt application."""
     from stempeluhr.utils import prepare_data_location_and_files, run_db_migrations, setup_logging
 
     # Prepare the data location and files. Needs to be done before importing the main application
     setup_logging()
+    # Typer replaces the hook with its console printer, which the windowed build never shows. With a
+    # non-default hook PyQt6 keeps running after a slot raises, so log it instead of losing it.
+    sys.excepthook = _log_unhandled_exception
     prepare_data_location_and_files()
     run_db_migrations()
 
