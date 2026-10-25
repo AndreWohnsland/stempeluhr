@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 from typing import TYPE_CHECKING
 
 import holidays
@@ -111,7 +111,7 @@ class ConfigWindow(QWidget, Ui_ConfigWindow):
 
     def set_schedule_values(self) -> None:
         """Set the fields of the schedule effective today, e.g. on start or after a schedule change elsewhere."""
-        schedule = DB_CONTROLLER.get_work_schedule_at(datetime.date.today())
+        schedule = DB_CONTROLLER.get_work_schedule_at(dt.date.today())
         self.input_working_hours.setValue(schedule.work_hours)
         self.work_hours_button.setChecked(schedule.use_hours_per_week)
         self.work_hours_button.setText("/ Week" if schedule.use_hours_per_week else "/ Day")
@@ -140,7 +140,7 @@ class ConfigWindow(QWidget, Ui_ConfigWindow):
 
     def _apply_schedule(self) -> None:
         """Persist changed time settings as a new schedule effective today; past days keep their old schedule."""
-        today = datetime.date.today()
+        today = dt.date.today()
         current = DB_CONTROLLER.get_work_schedule_at(today)
         selected_days: list[int] = []
         for day in range(7):

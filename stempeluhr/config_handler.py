@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import json
 from dataclasses import asdict, dataclass
 from inspect import signature
@@ -53,7 +53,7 @@ class Config:
     def __getitem__(self, item: CONFIG_NAMES) -> Any:
         return getattr(self, item)
 
-    def get_holidays(self, year: int) -> list[datetime.date]:
+    def get_holidays(self, year: int) -> list[dt.date]:
         available_holidays = holidays.country_holidays(self.country, subdiv=self.subdiv or None, years=year)
         return list(available_holidays.keys())
 

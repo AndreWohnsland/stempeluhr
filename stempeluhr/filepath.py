@@ -33,9 +33,18 @@ ROOT_PATH = Path(__file__).resolve().parents[1]
 PACKAGE_PATH = Path(__file__).resolve().parent
 HOME_PATH = Path.home()
 
-# Data folder (app data): keep the pre-rename dir if it already exists
-_legacy_folder = get_app_dir(LEGACY_APP_NAME)
-SAVE_FOLDER = _legacy_folder if _legacy_folder.exists() else get_app_dir()
+
+def _data_folder() -> Path:
+    # STEMPELUHR_DATA_DIR redirects all app data (db, config, logs, reports), e.g. for tests or a sandbox
+    if override := os.environ.get("STEMPELUHR_DATA_DIR"):
+        return Path(override)
+    # keep the pre-rename dir if it already exists
+    legacy = get_app_dir(LEGACY_APP_NAME)
+    return legacy if legacy.exists() else get_app_dir()
+
+
+# Data folder (app data)
+SAVE_FOLDER = _data_folder()
 
 # DB
 OLD_DATABASE_PATH = ROOT_PATH / "data" / "timedata.db"

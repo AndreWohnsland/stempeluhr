@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
@@ -10,7 +10,7 @@ from stempeluhr.models import OvertimeAdjustment, WorkSchedule
 
 
 def make_schedule(
-    valid_from: datetime.date,
+    valid_from: dt.date,
     daily_hours: float = 8.0,
     workdays: list[int] | None = None,
 ) -> WorkSchedule:
@@ -33,7 +33,7 @@ def mock_db_controller() -> MagicMock:
     mock.get_month_data.return_value = ([], [])
     mock.get_months_with_data.return_value = []
     mock.get_overtime_adjustments.return_value = []
-    mock.get_work_schedules.return_value = [make_schedule(datetime.date.min)]
+    mock.get_work_schedules.return_value = [make_schedule(dt.date.min)]
     return mock
 
 
@@ -55,7 +55,7 @@ def test_store_initialization(store_and_controller: tuple[Store, MagicMock]) -> 
 
 def test_update_data_with_data(store_and_controller: tuple[Store, MagicMock]) -> None:
     store_instance, mock_db_controller = store_and_controller
-    test_date = datetime.date(2025, 5, 20)
+    test_date = dt.date(2025, 5, 20)
     # Simulate a work event and a pause
     mock_db_controller.get_day_data.return_value = (
         [("2025-05-20T08:00:00", "start", "Default"), ("2025-05-20T16:00:00", "stop", "Default")],
@@ -78,12 +78,12 @@ def test_update_data_none_date(store_and_controller: tuple[Store, MagicMock]) ->
 def test_get_free_days_with_vacation_and_holiday(store_and_controller: tuple[Store, MagicMock]) -> None:
     store_instance, mock_db_controller = store_and_controller
     # Simulate vacation and holiday
-    mock_db_controller.get_time_off_days.return_value = [datetime.date(2025, 5, 1)]
+    mock_db_controller.get_time_off_days.return_value = [dt.date(2025, 5, 1)]
     with patch("stempeluhr.datastore.CONFIG_HANDLER") as mock_config:
-        mock_config.config.get_holidays.return_value = [datetime.date(2025, 5, 2)]
+        mock_config.config.get_holidays.return_value = [dt.date(2025, 5, 2)]
         mock_config.config.workdays = [0, 1, 2, 3, 4]
         free_days = store_instance.get_free_days(2025)
-        assert datetime.date(2025, 5, 1) in free_days or datetime.date(2025, 5, 2) in free_days
+        assert dt.date(2025, 5, 1) in free_days or dt.date(2025, 5, 2) in free_days
 
 
 def test_generate_all_data_populates_all_data(store_and_controller: tuple[Store, MagicMock]) -> None:
@@ -106,7 +106,7 @@ def test_get_year_data_returns_dataframe(store_and_controller: tuple[Store, Magi
 
 def test_generate_daily_data_with_pause(store_and_controller: tuple[Store, MagicMock]) -> None:
     store_instance, mock_db_controller = store_and_controller
-    test_date = datetime.date(2025, 5, 20)
+    test_date = dt.date(2025, 5, 20)
     mock_db_controller.get_day_data.return_value = ([("2025-05-20T08:00:00", "start", "Default")], [("2025-05-20", 30)])
     store_instance.generate_daily_data(test_date)
     assert any("Pause" in entry for entry in store_instance.daily_data)
@@ -114,7 +114,7 @@ def test_generate_daily_data_with_pause(store_and_controller: tuple[Store, Magic
 
 def test_generate_month_data_empty_work(store_and_controller: tuple[Store, MagicMock]) -> None:
     store_instance, mock_db_controller = store_and_controller
-    test_date = datetime.date(2025, 5, 1)
+    test_date = dt.date(2025, 5, 1)
     mock_db_controller.get_month_data.return_value = ([], [])
     month_data = store_instance.generate_month_data(test_date)
     assert isinstance(month_data.df, pd.DataFrame)
@@ -123,7 +123,7 @@ def test_generate_month_data_empty_work(store_and_controller: tuple[Store, Magic
 
 def test_generate_month_data_with_work(store_and_controller: tuple[Store, MagicMock]) -> None:
     store_instance, mock_db_controller = store_and_controller
-    test_date = datetime.date(2025, 5, 1)
+    test_date = dt.date(2025, 5, 1)
     mock_db_controller.get_month_data.return_value = (
         [("2025-05-01T08:00:00", "start", "Default"), ("2025-05-01T16:00:00", "stop", "Default")],
         [("2025-05-01", 60)],
@@ -158,7 +158,7 @@ def test_overtime_adjustment_counts_in_totals(store_and_controller: tuple[Store,
         [],
     )
     mock_db_controller.get_overtime_adjustments.return_value = [
-        OvertimeAdjustment(date=datetime.date(2025, 5, 15), hours=adjustment_hours)
+        OvertimeAdjustment(date=dt.date(2025, 5, 15), hours=adjustment_hours)
     ]
     with patch("stempeluhr.datastore.CONFIG_HANDLER") as mock_config:
         mock_config.config.get_daily_hours_at.return_value = 8.0
@@ -178,7 +178,7 @@ def test_overtime_adjustment_counts_in_totals(store_and_controller: tuple[Store,
 def test_future_overtime_adjustment_is_not_counted(store_and_controller: tuple[Store, MagicMock]) -> None:
     """An adjustment dated in the future does not affect the month data until its date arrives."""
     store_instance, mock_db_controller = store_and_controller
-    tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+    tomorrow = dt.date.today() + dt.timedelta(days=1)
     month_first = tomorrow.replace(day=1)
     start_str = f"{month_first.isoformat()}T08:00:00"
     mock_db_controller.get_month_data.return_value = (
@@ -202,7 +202,7 @@ def test_month_with_only_adjustment_is_not_dropped(store_and_controller: tuple[S
     adjustment_hours = -15.0
     mock_db_controller.get_month_data.return_value = ([], [])
     mock_db_controller.get_overtime_adjustments.return_value = [
-        OvertimeAdjustment(date=datetime.date(2025, 6, 10), hours=adjustment_hours)
+        OvertimeAdjustment(date=dt.date(2025, 6, 10), hours=adjustment_hours)
     ]
     with patch("stempeluhr.datastore.CONFIG_HANDLER") as mock_config:
         mock_config.config.get_daily_hours_at.return_value = 8.0
@@ -210,7 +210,7 @@ def test_month_with_only_adjustment_is_not_dropped(store_and_controller: tuple[S
         mock_config.config.get_holidays.return_value = []
         mock_config.config_hash.return_value = 12345
 
-        month_data = store_instance.generate_month_data(datetime.date(2025, 6, 1))
+        month_data = store_instance.generate_month_data(dt.date(2025, 6, 1))
         assert not month_data.df.empty
         assert month_data.df["overtime_adjustment"].sum() == adjustment_hours
 
@@ -224,7 +224,7 @@ def test_vacation_day_future_no_work_should_have_zero_work_and_overtime(
     expected_zero = 0.0
 
     # Get tomorrow's date
-    tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+    tomorrow = dt.date.today() + dt.timedelta(days=1)
     month_first = tomorrow.replace(day=1)
 
     # Mock CONFIG_HANDLER to return 8 hours as daily target
@@ -283,9 +283,9 @@ def test_vacation_day_past_no_work_has_correct_zero_overtime(
     daily_target = 8.0
 
     # Most recent past day that is a workday under the mocked Mon-Fri config
-    yesterday = datetime.date.today() - datetime.timedelta(days=1)
+    yesterday = dt.date.today() - dt.timedelta(days=1)
     while yesterday.weekday() > 4:
-        yesterday -= datetime.timedelta(days=1)
+        yesterday -= dt.timedelta(days=1)
     month_first = yesterday.replace(day=1)
 
     # Mock CONFIG_HANDLER to return 8 hours as daily target
@@ -337,9 +337,9 @@ def test_vacation_day_past_no_work_has_correct_zero_overtime(
 def test_schedule_change_keeps_past_target_times(store_and_controller: tuple[Store, MagicMock]) -> None:
     """Days before a schedule's effective date keep their old target time; the effective day uses the new one."""
     store_instance, mock_db_controller = store_and_controller
-    change_date = datetime.date(2025, 5, 16)  # a Friday
+    change_date = dt.date(2025, 5, 16)  # a Friday
     mock_db_controller.get_work_schedules.return_value = [
-        make_schedule(datetime.date.min, daily_hours=6.0),
+        make_schedule(dt.date.min, daily_hours=6.0),
         make_schedule(change_date, daily_hours=8.0),
     ]
     # 8 hours of work on a Friday before the change
@@ -351,23 +351,23 @@ def test_schedule_change_keeps_past_target_times(store_and_controller: tuple[Sto
         mock_config.config.get_holidays.return_value = []
         mock_config.config_hash.return_value = 12345
 
-        df = store_instance.generate_month_data(datetime.date(2025, 5, 1)).df
+        df = store_instance.generate_month_data(dt.date(2025, 5, 1)).df
 
-    assert df.loc[pd.Timestamp(datetime.date(2025, 5, 15)), "target_time"] == 6.0
+    assert df.loc[pd.Timestamp(dt.date(2025, 5, 15)), "target_time"] == 6.0
     assert df.loc[pd.Timestamp(change_date), "target_time"] == 8.0
     # overtime before the change is judged against the old schedule
-    assert df.loc[pd.Timestamp(datetime.date(2025, 5, 2)), "overtime"] == 2.0
+    assert df.loc[pd.Timestamp(dt.date(2025, 5, 2)), "overtime"] == 2.0
 
 
 def test_free_day_credit_uses_schedule_of_that_date(store_and_controller: tuple[Store, MagicMock]) -> None:
     """A vacation day only counts as a free day if its weekday was a workday back then."""
     store_instance, mock_db_controller = store_and_controller
     mock_db_controller.get_work_schedules.return_value = [
-        make_schedule(datetime.date.min, workdays=[0, 1, 2, 3, 4]),
-        make_schedule(datetime.date(2025, 6, 1), workdays=[0, 1, 2, 3]),  # Fridays dropped
+        make_schedule(dt.date.min, workdays=[0, 1, 2, 3, 4]),
+        make_schedule(dt.date(2025, 6, 1), workdays=[0, 1, 2, 3]),  # Fridays dropped
     ]
-    vacation_friday_before = datetime.date(2025, 5, 16)
-    vacation_friday_after = datetime.date(2025, 6, 13)
+    vacation_friday_before = dt.date(2025, 5, 16)
+    vacation_friday_after = dt.date(2025, 6, 13)
     mock_db_controller.get_time_off_days.return_value = [vacation_friday_before, vacation_friday_after]
     with patch("stempeluhr.datastore.CONFIG_HANDLER") as mock_config:
         mock_config.config.get_holidays.return_value = []
@@ -377,12 +377,12 @@ def test_free_day_credit_uses_schedule_of_that_date(store_and_controller: tuple[
             [("2025-05-05T08:00:00", "start", "Default"), ("2025-05-05T09:00:00", "stop", "Default")],
             [],
         )
-        may_df = store_instance.generate_month_data(datetime.date(2025, 5, 1)).df
+        may_df = store_instance.generate_month_data(dt.date(2025, 5, 1)).df
         mock_db_controller.get_month_data.return_value = (
             [("2025-06-02T08:00:00", "start", "Default"), ("2025-06-02T09:00:00", "stop", "Default")],
             [],
         )
-        june_df = store_instance.generate_month_data(datetime.date(2025, 6, 1)).df
+        june_df = store_instance.generate_month_data(dt.date(2025, 6, 1)).df
 
     # Friday was a workday when the vacation was taken: full daily credit
     assert may_df.loc[pd.Timestamp(vacation_friday_before), "total_time"] == 8.0
@@ -399,15 +399,15 @@ def test_project_switch_splits_time_between_projects(store_and_controller: tuple
         ("2025-05-02T10:00:00", "start", "ProjectB"),
         ("2025-05-02T12:00:00", "stop", "ProjectB"),
     ]
-    frame = store_instance.get_project_data(datetime.date(2025, 5, 1))
+    frame = store_instance.get_project_data(dt.date(2025, 5, 1))
 
-    day = pd.Timestamp(datetime.date(2025, 5, 2))
+    day = pd.Timestamp(dt.date(2025, 5, 2))
     assert frame.loc[day, "ProjectA"] == 2.0
     assert frame.loc[day, "ProjectB"] == 2.0
 
     # the combined month report counts the same span once
     mock_db_controller.get_month_data.return_value = (mock_db_controller.get_period_work.return_value, [])
-    df = store_instance.generate_month_data(datetime.date(2025, 5, 1)).df
+    df = store_instance.generate_month_data(dt.date(2025, 5, 1)).df
     assert df.loc[day, "total_time"] == 4.0
 
 
@@ -418,8 +418,8 @@ def test_repeated_start_on_same_project_is_ignored(store_and_controller: tuple[S
         ("2025-05-02T09:00:00", "start", "ProjectA"),
         ("2025-05-02T10:00:00", "stop", "ProjectA"),
     ]
-    frame = store_instance.get_project_data(datetime.date(2025, 5, 1))
-    assert frame.loc[pd.Timestamp(datetime.date(2025, 5, 2)), "ProjectA"] == 2.0
+    frame = store_instance.get_project_data(dt.date(2025, 5, 1))
+    assert frame.loc[pd.Timestamp(dt.date(2025, 5, 2)), "ProjectA"] == 2.0
 
 
 def test_forgotten_stop_on_past_day_is_capped_at_midnight(store_and_controller: tuple[Store, MagicMock]) -> None:
@@ -427,16 +427,16 @@ def test_forgotten_stop_on_past_day_is_capped_at_midnight(store_and_controller: 
     mock_db_controller.get_period_work.return_value = [
         ("2025-05-02T22:00:00", "start", "ProjectA"),
     ]
-    frame = store_instance.get_project_data(datetime.date(2025, 5, 1))
-    assert frame.loc[pd.Timestamp(datetime.date(2025, 5, 2)), "ProjectA"] == 2.0
+    frame = store_instance.get_project_data(dt.date(2025, 5, 1))
+    assert frame.loc[pd.Timestamp(dt.date(2025, 5, 2)), "ProjectA"] == 2.0
 
 
 def test_start_booked_ahead_of_now_counts_no_time(store_and_controller: tuple[Store, MagicMock]) -> None:
     """A start entered for a future time on today has no elapsed time yet (no negative interval)."""
     store_instance, mock_db_controller = store_and_controller
-    future_start = datetime.datetime.now() + datetime.timedelta(hours=3)
-    if future_start.date() != datetime.date.today():  # running close to midnight: stay on today
-        future_start = datetime.datetime.combine(datetime.date.today(), datetime.time(23, 59, 59))
+    future_start = dt.datetime.now() + dt.timedelta(hours=3)
+    if future_start.date() != dt.date.today():  # running close to midnight: stay on today
+        future_start = dt.datetime.combine(dt.date.today(), dt.time(23, 59, 59))
     mock_db_controller.get_period_work.return_value = [(future_start.isoformat(), "start", "ProjectA")]
     frame = store_instance.get_project_data(future_start.date())
     assert "ProjectA" not in frame.columns
@@ -452,19 +452,19 @@ def test_get_project_data_year_aggregates_by_month(store_and_controller: tuple[S
         ("2025-06-10T08:00:00", "start", "ProjectB"),
         ("2025-06-10T12:00:00", "stop", "ProjectB"),
     ]
-    frame = store_instance.get_project_data(datetime.date(2025, 5, 1), whole_year=True)
+    frame = store_instance.get_project_data(dt.date(2025, 5, 1), whole_year=True)
 
     assert len(frame) == 12
-    assert frame.loc[pd.Timestamp(datetime.date(2025, 5, 1)), "ProjectA"] == 3.0
-    assert frame.loc[pd.Timestamp(datetime.date(2025, 6, 1)), "ProjectB"] == 4.0
+    assert frame.loc[pd.Timestamp(dt.date(2025, 5, 1)), "ProjectA"] == 3.0
+    assert frame.loc[pd.Timestamp(dt.date(2025, 6, 1)), "ProjectB"] == 4.0
     # a project shows 0.0 in months without time on it
-    assert frame.loc[pd.Timestamp(datetime.date(2025, 6, 1)), "ProjectA"] == 0.0
+    assert frame.loc[pd.Timestamp(dt.date(2025, 6, 1)), "ProjectA"] == 0.0
 
 
 def test_get_project_data_empty_month_has_full_index(store_and_controller: tuple[Store, MagicMock]) -> None:
     store_instance, mock_db_controller = store_and_controller
     mock_db_controller.get_period_work.return_value = []
-    frame = store_instance.get_project_data(datetime.date(2025, 5, 1))
+    frame = store_instance.get_project_data(dt.date(2025, 5, 1))
     assert len(frame) == 31
     assert frame.columns.empty
 
@@ -475,14 +475,14 @@ def test_get_month_targets_for_months_without_data(store_and_controller: tuple[S
     mock_db_controller.get_months_with_data.return_value = [(2024, 3)]
 
     # past month within the tracked period: schedule target on workdays, none on weekends
-    targets = store_instance.get_month_targets(datetime.date(2024, 5, 1))
+    targets = store_instance.get_month_targets(dt.date(2024, 5, 1))
     days = pd.date_range("2024-05-01", periods=len(targets), freq="D")
     assert [t for t, d in zip(targets, days) if d.weekday() < 5] == [8.0] * 23
     assert all(t == 0.0 for t, d in zip(targets, days) if d.weekday() >= 5)
 
     # month before tracking started: no targets
-    assert store_instance.get_month_targets(datetime.date(2024, 1, 1)) == [0.0] * 31
+    assert store_instance.get_month_targets(dt.date(2024, 1, 1)) == [0.0] * 31
 
     # future month: no targets yet
-    future_month = (datetime.date.today() + datetime.timedelta(days=40)).replace(day=1)
+    future_month = (dt.date.today() + dt.timedelta(days=40)).replace(day=1)
     assert all(t == 0.0 for t in store_instance.get_month_targets(future_month))

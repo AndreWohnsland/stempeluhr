@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import calendar
-import datetime
+import datetime as dt
 import logging
 import re
 from dataclasses import dataclass, field
@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class EventData:
-    event_time: datetime.datetime
+    event_time: dt.datetime
     event: str
 
 
@@ -102,7 +102,7 @@ class DataWindow(QWidget, Ui_DataWindow):
         return self.switch_button.isChecked()
 
     @property
-    def selected_date(self) -> datetime.date:
+    def selected_date(self) -> dt.date:
         return self.date_edit.date().toPyDate()
 
     @property
@@ -145,7 +145,7 @@ class DataWindow(QWidget, Ui_DataWindow):
         if (month_changed and self.plot_month) or year_changed:
             self.plot()
 
-    def _only_change_date(self, set_date: QDate | datetime.date) -> None:
+    def _only_change_date(self, set_date: QDate | dt.date) -> None:
         """Change date while suppressing the on change event of the date edit."""
         self.programmatic_change = True
         self.date_edit.setDate(set_date)
@@ -465,7 +465,7 @@ class DataWindow(QWidget, Ui_DataWindow):
             if datetime_item is None or event_item is None:
                 return None
             try:
-                return EventData(datetime.datetime.fromisoformat(datetime_item.text()), event_item.text())
+                return EventData(dt.datetime.fromisoformat(datetime_item.text()), event_item.text())
             except ValueError:
                 # pause, date and summary rows carry no event timestamp
                 return None
@@ -487,7 +487,7 @@ class DataWindow(QWidget, Ui_DataWindow):
         if date_item is None:
             return
         try:
-            date = datetime.datetime.strptime(date_item.text(), "%d/%m/%Y").date()
+            date = dt.datetime.strptime(date_item.text(), "%d/%m/%Y").date()
         except ValueError:
             # the project summary rows carry no date
             return

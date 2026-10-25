@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 from typing import TYPE_CHECKING
 
 from PyQt6.QtCore import Qt
@@ -189,7 +189,7 @@ class ScheduleEntryWidget(QWidget):
             self.day_spinboxes[day].setEnabled(different_times and self.day_radios[day].isChecked())
 
     def _current_values(self) -> WorkSchedule:
-        valid_from = datetime.date.min if self.is_baseline else self.date_edit.date().toPyDate()
+        valid_from = dt.date.min if self.is_baseline else self.date_edit.date().toPyDate()
         time_per_day = self.schedule.time_per_day
         if self.input_different_times.isChecked():
             time_per_day = [self.day_spinboxes[day].value() for day in range(7)]

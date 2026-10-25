@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import logging
 from pathlib import Path
 
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class DataExporter:
-    def export_data(self, df: pd.DataFrame, report_date: datetime.date) -> str:
+    def export_data(self, df: pd.DataFrame, report_date: dt.date) -> str:
         if df.empty:
             message = "No data to export, will no generate file..."
             logger.warning(message)
@@ -51,7 +51,7 @@ class DataExporter:
         bold: xlsxwriter.format.Format,
         normal_color: xlsxwriter.format.Format,
         vacation_color: xlsxwriter.format.Format,
-        report_date: datetime.date,
+        report_date: dt.date,
     ) -> None:
         worksheet.write("A1", "Name:", bold)
         worksheet.write("B1", CONFIG_HANDLER.config.name, normal_color)
@@ -76,7 +76,7 @@ class DataExporter:
         df: pd.DataFrame,
         normal_color: xlsxwriter.format.Format,
         vacation_color: xlsxwriter.format.Format,
-        report_date: datetime.date,
+        report_date: dt.date,
     ) -> None:
         free_days = set(
             CONFIG_HANDLER.config.get_holidays(report_date.year) + DB_CONTROLLER.get_time_off_days(report_date.year)
@@ -111,7 +111,7 @@ class DataExporter:
         worksheet: xlsxwriter.Workbook.worksheet_class,
         cell: str,
         color: xlsxwriter.format.Format,
-        value: datetime.time | None = None,
+        value: dt.time | None = None,
     ) -> None:
         if value:
             worksheet.write(cell, value.strftime("%H:%M"), color)
