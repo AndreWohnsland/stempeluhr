@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 from typing import TYPE_CHECKING
 
 from PyQt6.QtCore import Qt
@@ -32,7 +32,7 @@ class VacationWindow(QWidget, Ui_VacationWindow):
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
 
         # setting dates to today
-        today = datetime.date.today()
+        today = dt.date.today()
         self.year_select.setValue(today.year)
         self.date_edit.setDate(today)
 
@@ -89,14 +89,14 @@ class VacationWindow(QWidget, Ui_VacationWindow):
         self.list_widget_dates.addItem(item)
         self.list_widget_dates.setItemWidget(item, item_widget)
 
-    def delete_date_item(self, item: QListWidgetItem, date: datetime.date) -> None:
+    def delete_date_item(self, item: QListWidgetItem, date: dt.date) -> None:
         if not UI_CONTROLLER.user_okay(f"Do you want to remove the time off on {date}?"):
             return
         DB_CONTROLLER.remove_time_off(date)
         row = self.list_widget_dates.row(item)
         self.list_widget_dates.takeItem(row)
 
-    def _remove_vacation_entry(self, date: datetime.date, container: QHBoxLayout) -> None:
+    def _remove_vacation_entry(self, date: dt.date, container: QHBoxLayout) -> None:
         """Remove the vacation entry from the list and the database."""
         DB_CONTROLLER.remove_time_off(date)
         UI_CONTROLLER.delete_items_of_layout(container)

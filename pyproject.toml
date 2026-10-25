@@ -48,8 +48,8 @@ module-root = ""
 dev = [
     "pyinstaller>=6.22.2",
     "jupyterlab>=4.6.3",
-    "ty==0.0.77",
-    "ruff>=0.16.4",
+    "ty==0.0.90",
+    "ruff==0.17.1",
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
     "pre-commit>=4.6.2",

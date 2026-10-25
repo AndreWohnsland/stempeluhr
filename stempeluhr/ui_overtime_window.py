@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 from typing import TYPE_CHECKING
 
 from PyQt6.QtCore import Qt
@@ -32,7 +32,7 @@ class OvertimeWindow(QWidget, Ui_OvertimeWindow):
         )
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
 
-        self.date_edit.setDate(datetime.date.today())
+        self.date_edit.setDate(dt.date.today())
         self._generate_adjustment_list()
         self.save_button.clicked.connect(self._add_adjustment)
 
@@ -68,7 +68,7 @@ class OvertimeWindow(QWidget, Ui_OvertimeWindow):
         self.list_widget_dates.addItem(item)
         self.list_widget_dates.setItemWidget(item, item_widget)
 
-    def _delete_adjustment_item(self, item: QListWidgetItem, date: datetime.date) -> None:
+    def _delete_adjustment_item(self, item: QListWidgetItem, date: dt.date) -> None:
         if not UI_CONTROLLER.user_okay(f"Do you want to remove the overtime adjustment on {date}?"):
             return
         DB_CONTROLLER.remove_overtime_adjustment(date)

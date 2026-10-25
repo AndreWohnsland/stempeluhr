@@ -74,6 +74,15 @@ If you want to contribute, also install the [pre-commit](https://pre-commit.com/
 uv run pre-commit install
 ```
 
+The app keeps its data (database, config, logs, reports) in your user data folder.
+To try out changes without touching your real data, point `STEMPELUHR_DATA_DIR` to another folder, it gets a fresh database and config:
+
+```bash
+STEMPELUHR_DATA_DIR=/tmp/stempeluhr-sandbox uv run runme.py
+```
+
+The tests (`uv run pytest tests`) do this automatically with a temporary folder.
+
 ### Manual build of the standalone version
 
 If you want to build the standalone version by yourself, you can also do it with [uv](https://docs.astral.sh/uv/getting-started/installation/).

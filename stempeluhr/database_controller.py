@@ -11,7 +11,7 @@ The DatabaseController class provides high-level methods for:
 - Data retrieval for daily and monthly reports
 """
 
-import datetime
+import datetime as dt
 import logging
 from collections.abc import Generator
 from contextlib import contextmanager
@@ -35,7 +35,7 @@ def _baseline_work_schedule() -> WorkSchedule:
     """
     legacy = CONFIG_HANDLER.read_config_file()
     return WorkSchedule(
-        valid_from=datetime.date.min,
+        valid_from=dt.date.min,
         work_hours=legacy.get("work_hours", 40.0),
         use_hours_per_week=legacy.get("use_hours_per_week", True),
         workdays=legacy.get("workdays", [0, 1, 2, 3, 4]),
@@ -90,7 +90,7 @@ class DatabaseController:
         finally:
             session.close()
 
-    def add_event(self, event: str, entry_datetime: datetime.datetime, project: str) -> None:
+    def add_event(self, event: str, entry_datetime: dt.datetime, project: str) -> None:
         datetime_string = entry_datetime.isoformat()
         logger.info("Add Event: %s, timestamp: %s", event, datetime_string)
         with self.session_scope() as session:
@@ -102,48 +102,48 @@ class DatabaseController:
             stmt = select(Event).order_by(Event.date.desc()).limit(1)
             return session.execute(stmt).scalar_one_or_none()
 
-    def add_pause(self, pause_time: int, entry_date: datetime.date) -> None:
+    def add_pause(self, pause_time: int, entry_date: dt.date) -> None:
         if self.day_exists(entry_date):
             self.update_pause(pause_time, entry_date)
         else:
             self.insert_pause(pause_time, entry_date)
 
-    def update_pause(self, pause_time: int, date: datetime.date) -> None:
+    def update_pause(self, pause_time: int, date: dt.date) -> None:
         logger.info("Updating pause time by %s at %s", pause_time, date.isoformat())
         with self.session_scope() as session:
             stmt = update(Pause).where(Pause.date == date).values(time=Pause.time + pause_time)
             session.execute(stmt)
 
-    def insert_pause(self, pause_time: int, date: datetime.date) -> None:
+    def insert_pause(self, pause_time: int, date: dt.date) -> None:
         logger.info("Inserting pause time by %s at %s", pause_time, date.isoformat())
         with self.session_scope() as session:
             new_pause = Pause(date=date, time=pause_time)
             session.add(new_pause)
 
-    def day_exists(self, date: datetime.date) -> int:
+    def day_exists(self, date: dt.date) -> int:
         with self.session_scope() as session:
             stmt = select(Pause).where(Pause.date == date)
             result = session.execute(stmt).scalar_one_or_none()
             return 1 if result else 0
 
-    def get_month_data(self, search_date: datetime.date) -> tuple[list[tuple[str, str, str]], list[tuple[str, int]]]:
-        start = datetime.date(search_date.year, search_date.month, 1)
+    def get_month_data(self, search_date: dt.date) -> tuple[list[tuple[str, str, str]], list[tuple[str, int]]]:
+        start = dt.date(search_date.year, search_date.month, 1)
         end = start + relativedelta(months=+1)
         work = self.get_period_work(start, end)
         pause = self.get_period_pause(start, end)
         return work, pause
 
-    def get_day_data(self, day: datetime.date) -> tuple[list[tuple[str, str, str]], list[tuple[str, int]]]:
+    def get_day_data(self, day: dt.date) -> tuple[list[tuple[str, str, str]], list[tuple[str, int]]]:
         start = day
         end = start + relativedelta(days=+1)
         work = self.get_period_work(start, end)
         pause = self.get_period_pause(start, end)
         return work, pause
 
-    def get_period_work(self, start: datetime.date, end: datetime.date) -> list[tuple[str, str, str]]:
+    def get_period_work(self, start: dt.date, end: dt.date) -> list[tuple[str, str, str]]:
         with self.session_scope() as session:
-            start_dt = datetime.datetime.combine(start, datetime.time.min)
-            end_dt = datetime.datetime.combine(end, datetime.time.min)
+            start_dt = dt.datetime.combine(start, dt.time.min)
+            end_dt = dt.datetime.combine(end, dt.time.min)
             stmt = select(Event).where(Event.date >= start_dt, Event.date < end_dt).order_by(Event.date)
             results = session.execute(stmt).scalars().all()
             # events from before the project column existed read as "Default"
@@ -155,7 +155,7 @@ class DatabaseController:
             stmt = select(Event.project).distinct()
             return sorted({project or "Default" for project in session.execute(stmt).scalars()})
 
-    def get_period_pause(self, start: datetime.date, end: datetime.date) -> list[tuple[str, int]]:
+    def get_period_pause(self, start: dt.date, end: dt.date) -> list[tuple[str, int]]:
         with self.session_scope() as session:
             # end-exclusive like get_period_work, else the first day of the next month leaks into the month df
             stmt = select(Pause).where(Pause.date >= start, Pause.date < end).order_by(Pause.date)
@@ -175,12 +175,12 @@ class DatabaseController:
                 months.update((int(y), int(m)) for y, m in session.execute(stmt).all())
             return sorted(months)
 
-    def delete_event(self, delete_datetime: datetime.datetime) -> None:
+    def delete_event(self, delete_datetime: dt.datetime) -> None:
         with self.session_scope() as session:
             stmt = delete(Event).where(Event.date == delete_datetime)
             session.execute(stmt)
 
-    def add_time_off(self, day: datetime.date, reason: str) -> None:
+    def add_time_off(self, day: dt.date, reason: str) -> None:
         date_string = day.isoformat()
         logger.info("Adding Time Off on %s", date_string)
         with self.session_scope() as session:
@@ -190,25 +190,25 @@ class DatabaseController:
                 new_vacation = TimeOff(date=day, reason=reason)
                 session.add(new_vacation)
 
-    def get_time_off_days(self, year: int) -> list[datetime.date]:
+    def get_time_off_days(self, year: int) -> list[dt.date]:
         return [vacation.date for vacation in self.get_time_off(year)]
 
     def get_time_off(self, year: int) -> list[TimeOff]:
         with self.session_scope() as session:
             stmt = select(TimeOff).where(
-                TimeOff.date >= datetime.date(year, 1, 1),
-                TimeOff.date <= datetime.date(year, 12, 31),
+                TimeOff.date >= dt.date(year, 1, 1),
+                TimeOff.date <= dt.date(year, 12, 31),
             )
             results = session.execute(stmt).scalars().all()
             return list(results)
 
-    def remove_time_off(self, vacation_date: datetime.date) -> None:
+    def remove_time_off(self, vacation_date: dt.date) -> None:
         logger.info("Removing Time Off on %s", vacation_date.isoformat())
         with self.session_scope() as session:
             stmt = delete(TimeOff).where(TimeOff.date == vacation_date)
             session.execute(stmt)
 
-    def add_overtime_adjustment(self, day: datetime.date, hours: float) -> None:
+    def add_overtime_adjustment(self, day: dt.date, hours: float) -> None:
         """Add an overtime adjustment, overwriting the value if the date already has one."""
         logger.info("Adding overtime adjustment of %s h on %s", hours, day.isoformat())
         with self.session_scope() as session:
@@ -221,7 +221,7 @@ class DatabaseController:
                 session.add(OvertimeAdjustment(date=day, hours=hours))
 
     def get_overtime_adjustments(
-        self, start: datetime.date | None = None, end: datetime.date | None = None
+        self, start: dt.date | None = None, end: dt.date | None = None
     ) -> list[OvertimeAdjustment]:
         """Return adjustments within [start, end), or all if no period is given."""
         with self.session_scope() as session:
@@ -232,7 +232,7 @@ class DatabaseController:
                 stmt = stmt.where(OvertimeAdjustment.date < end)
             return list(session.execute(stmt).scalars().all())
 
-    def remove_overtime_adjustment(self, day: datetime.date) -> None:
+    def remove_overtime_adjustment(self, day: dt.date) -> None:
         logger.info("Removing overtime adjustment on %s", day.isoformat())
         with self.session_scope() as session:
             stmt = delete(OvertimeAdjustment).where(OvertimeAdjustment.date == day)
@@ -244,7 +244,7 @@ class DatabaseController:
             stmt = select(WorkSchedule).order_by(WorkSchedule.valid_from)
             return list(session.execute(stmt).scalars().all())
 
-    def get_work_schedule_at(self, day: datetime.date) -> WorkSchedule:
+    def get_work_schedule_at(self, day: dt.date) -> WorkSchedule:
         """Return the schedule effective on the given day (the seeded baseline guarantees one exists)."""
         with self.session_scope() as session:
             stmt = (
@@ -317,7 +317,7 @@ class DatabaseController:
         target.different_workdays = source.different_workdays
         target.time_per_day = source.time_per_day
 
-    def change_time_off_reason(self, vacation_date: datetime.date, new_reason: str) -> None:
+    def change_time_off_reason(self, vacation_date: dt.date, new_reason: str) -> None:
         logger.info("Changing Time Off reason on %s to %s", vacation_date.isoformat(), new_reason)
         with self.session_scope() as session:
             stmt = update(TimeOff).where(TimeOff.date == vacation_date).values(reason=new_reason)

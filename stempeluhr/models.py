@@ -11,7 +11,7 @@ The ORM provides:
 - Support for database migrations via Alembic (future)
 """
 
-import datetime
+import datetime as dt
 
 from sqlalchemy import JSON, Boolean, DateTime, Float, Index, Integer, String, create_engine
 from sqlalchemy import Date as SqlDate
@@ -26,13 +26,13 @@ class Event(Base):
     __tablename__ = "Events"
 
     ID: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    date: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False, name="Date")
+    date: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False, name="Date")
     action: Mapped[str] = mapped_column(String, nullable=False, name="Action")
     project: Mapped[str | None] = mapped_column(String, nullable=True, name="Project")
 
     __table_args__ = (Index("idx_datetime", "Date"),)
 
-    def __init__(self, date: datetime.datetime, action: str, project: str | None) -> None:  # noqa: D107
+    def __init__(self, date: dt.datetime, action: str, project: str | None) -> None:  # noqa: D107
         self.date = date
         self.action = action
         self.project = project
@@ -42,12 +42,12 @@ class Pause(Base):
     __tablename__ = "Pause"
 
     ID: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    date: Mapped[datetime.date] = mapped_column(SqlDate, nullable=False, unique=True, name="Date")
+    date: Mapped[dt.date] = mapped_column(SqlDate, nullable=False, unique=True, name="Date")
     time: Mapped[int] = mapped_column(Integer, nullable=False, name="Time")
 
     __table_args__ = (Index("idx_date", "Date", unique=True),)
 
-    def __init__(self, date: datetime.date, time: int) -> None:  # noqa: D107
+    def __init__(self, date: dt.date, time: int) -> None:  # noqa: D107
         self.date = date
         self.time = time
 
@@ -56,7 +56,7 @@ class TimeOff(Base):
     __tablename__ = "TimeOff"
 
     ID: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    date: Mapped[datetime.date] = mapped_column(SqlDate, nullable=False, unique=True, name="Date")
+    date: Mapped[dt.date] = mapped_column(SqlDate, nullable=False, unique=True, name="Date")
     reason: Mapped[str] = mapped_column(
         String,
         nullable=False,
@@ -67,7 +67,7 @@ class TimeOff(Base):
 
     __table_args__ = (Index("idx_date_vacation", "Date", unique=True),)
 
-    def __init__(self, date: datetime.date, reason: str = "Vacation") -> None:  # noqa: D107
+    def __init__(self, date: dt.date, reason: str = "Vacation") -> None:  # noqa: D107
         self.date = date
         self.reason = reason
 
@@ -78,12 +78,12 @@ class OvertimeAdjustment(Base):
     __tablename__ = "OvertimeAdjustment"
 
     ID: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    date: Mapped[datetime.date] = mapped_column(SqlDate, nullable=False, unique=True, name="Date")
+    date: Mapped[dt.date] = mapped_column(SqlDate, nullable=False, unique=True, name="Date")
     hours: Mapped[float] = mapped_column(Float, nullable=False, name="Hours")
 
     __table_args__ = (Index("idx_date_adjustment", "Date", unique=True),)
 
-    def __init__(self, date: datetime.date, hours: float) -> None:  # noqa: D107
+    def __init__(self, date: dt.date, hours: float) -> None:  # noqa: D107
         self.date = date
         self.hours = hours
 
@@ -97,7 +97,7 @@ class WorkSchedule(Base):
     __tablename__ = "WorkSchedule"
 
     ID: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    valid_from: Mapped[datetime.date] = mapped_column(SqlDate, nullable=False, unique=True, name="ValidFrom")
+    valid_from: Mapped[dt.date] = mapped_column(SqlDate, nullable=False, unique=True, name="ValidFrom")
     work_hours: Mapped[float] = mapped_column(Float, nullable=False, name="WorkHours")
     use_hours_per_week: Mapped[bool] = mapped_column(Boolean, nullable=False, name="UseHoursPerWeek")
     workdays: Mapped[list[int]] = mapped_column(JSON, nullable=False, name="Workdays")
@@ -109,7 +109,7 @@ class WorkSchedule(Base):
 
     def __init__(  # noqa: D107, PLR0913, PLR0917
         self,
-        valid_from: datetime.date,
+        valid_from: dt.date,
         work_hours: float,
         use_hours_per_week: bool,
         workdays: list[int],

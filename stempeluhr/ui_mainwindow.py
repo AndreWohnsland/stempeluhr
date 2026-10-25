@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import logging
 from collections.abc import Callable
 from typing import Any
@@ -40,7 +40,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # set manual here, since it does not recognize the hidden state at init somehow.
         # The default app shows the elements and got the additional height.
         self.past_datetime_edit.hide()
-        self.past_datetime_edit.setDateTime(datetime.datetime.now())
+        self.past_datetime_edit.setDateTime(dt.datetime.now())
         self.back_button.hide()
         self.resize_mainwindow(0, -80)
         self.data_window = DataWindow(self)
@@ -128,7 +128,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.is_past_time:
             return
         self.past_datetime_edit.show()
-        self.past_datetime_edit.setDateTime(datetime.datetime.now())
+        self.past_datetime_edit.setDateTime(dt.datetime.now())
         self.back_button.show()
         self.resize_mainwindow(0, 80)
 
@@ -163,7 +163,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def add_pause(self, check_past_entry: bool = True) -> None:
         """Add a pause to the database."""
         pause = self.pause
-        entry_date = datetime.date.today()
+        entry_date = dt.date.today()
         if self.is_past_time and check_past_entry:
             entry_date = self.get_past_date()
         DB_CONTROLLER.add_pause(pause, entry_date)
@@ -173,24 +173,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         )
         self.update_other_windows()
 
-    def get_past_date(self) -> datetime.date:
+    def get_past_date(self) -> dt.date:
         """Return the date from the past datetime edit."""
         qt_object = self.past_datetime_edit.dateTime()
         qt_date = qt_object.date()
-        return datetime.date(qt_date.year(), qt_date.month(), qt_date.day())
+        return dt.date(qt_date.year(), qt_date.month(), qt_date.day())
 
-    def get_past_datetime(self) -> datetime.datetime:
+    def get_past_datetime(self) -> dt.datetime:
         """Return the datetime from the past datetime edit."""
         qt_object = self.past_datetime_edit.dateTime()
         qt_date = qt_object.date()
         qt_time = qt_object.time()
-        return datetime.datetime(
+        return dt.datetime(
             qt_date.year(), qt_date.month(), qt_date.day(), qt_time.hour(), qt_time.minute(), qt_time.second()
         )
 
     def add_event(self, event: str, check_past_entry: bool = True) -> None:
         """Add an event to the database."""
-        entry_datetime = datetime.datetime.now().replace(microsecond=0)
+        entry_datetime = dt.datetime.now().replace(microsecond=0)
         if self.is_past_time and check_past_entry:
             entry_datetime = self.get_past_datetime()
         project = self.input_project.currentText()
